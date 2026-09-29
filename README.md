@@ -17,14 +17,14 @@ Terminal tabanlı bir network audit ve analiz aracı. Port tarama, ping sweep, D
 
 | Modül | Ne yapar | Durum |
 |-------|----------|--------|
-| Port Scanner | TCP port tarama (OPEN/CLOSED/FILTERED) | ✅ v1.0 |
-| Ping Scanner | CIDR ağında canlı host tespiti | ✅ v1.0 |
+| Port Scanner | TCP port tarama (OPEN/CLOSED/FILTERED), yerel ağda cihaz markası | ✅ v1.0 |
+| Ping Scanner | CIDR ağında canlı host tespiti, MAC adresi ve marka | ✅ v1.0 |
 | DNS Lookup | A, MX, NS, TXT kayıtları | ✅ v1.0 |
 | Whois / IP Info | IP/domain temel bilgi | ✅ v1.0 |
 | Log Analyzer | Şüpheli log satırı ayıklama | ✅ v1.0 |
 | SSH Failed Login | Auth log brute-force analizi | ✅ v1.0 |
-| SNMP Collector | SNMP v2c cihaz bilgisi | ✅ v1.0 |
-| Raporlama | TXT / JSON dışa aktarma | ✅ v1.0 |
+| SNMP Collector | SNMP v2c cihaz bilgisi ve marka (sysObjectID) | ✅ v1.0 |
+| Raporlama | Tüm modüllerin son sonucunu TXT / JSON dışa aktarma | ✅ v1.0 |
 
 ---
     
@@ -82,7 +82,7 @@ python main.py
 ### Bağımlılıklar
 
 - Python 3.8+
-- `colorama`, `dnspython`, `pysnmp`
+- `colorama`, `dnspython`, `pysnmp`, `netaddr` (MAC adresinden marka bulma)
 
 ## Hazır binary indirme
 
@@ -140,5 +140,10 @@ Tam metin: [LICENSE](LICENSE)
 **DNS Lookup:** menü `3` → `google.com` → kayıt türü
 
 **Raporlama:** önce bir modül çalıştır, menü `8` → TXT veya JSON
+
+### Marka tespiti
+
+- **Ping / Port Scanner:** cihazın MAC adresi bilgisayarın ARP tablosundan okunur ve IEEE OUI kaydından markası bulunur (MikroTik, Ubiquiti, Cambium, Mimosa vb.). Bu yalnızca taramayı yapan bilgisayarla **aynı yerel ağdaki** cihazlarda çalışır; router arkasındaki cihazların MAC adresi görünmez.
+- **SNMP Collector:** marka `sysObjectID` değerinden (gerekirse `sysDescr`'den) bulunur. Router arkasındaki cihazlar için bu yöntemi kullanın.
 
 ---

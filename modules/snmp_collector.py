@@ -10,12 +10,14 @@ import asyncio
 import re
 from colorama import Fore, Style
 from pysnmp.hlapi.v3arch.asyncio import CommunityData, ContextData, ObjectIdentity, ObjectType, SnmpEngine, UdpTransportTarget, get_cmd
+from modules.session_store import save as save_session
+from modules.vendor import snmp_vendor
 IPV4_PATTERN = re.compile('^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$')
 SNMP_TIMEOUT = 2
 SNMP_RETRIES = 1
 DEFAULT_COMMUNITY = 'public'
 VERSION_MENU = {'1': 'SNMP v2c', '2': 'SNMP v3'}
-SYSTEM_OIDS = {'sysName': '1.3.6.1.2.1.1.5.0', 'sysDescr': '1.3.6.1.2.1.1.1.0', 'sysUpTime': '1.3.6.1.2.1.1.3.0', 'sysContact': '1.3.6.1.2.1.1.4.0', 'sysLocation': '1.3.6.1.2.1.1.6.0'}
+SYSTEM_OIDS = {'sysName': '1.3.6.1.2.1.1.5.0', 'sysDescr': '1.3.6.1.2.1.1.1.0', 'sysObjectID': '1.3.6.1.2.1.1.2.0', 'sysUpTime': '1.3.6.1.2.1.1.3.0', 'sysContact': '1.3.6.1.2.1.1.4.0', 'sysLocation': '1.3.6.1.2.1.1.6.0'}
 
 def _validate_ip(ip: str) -> bool:
     return bool(IPV4_PATTERN.match(ip.strip()))
@@ -69,7 +71,7 @@ def _print_results(host: str, info: dict[str, str]) -> None:
     print(Fore.CYAN + Style.BRIGHT + '\n' + '=' * 40)
     print('SNMP DEVICE INFO SONUÇLARI')
     print('=' * 40 + Style.RESET_ALL + '\n')
-    fields = [('IP', host), ('Device Name', info.get('sysName', 'Bilinmiyor')), ('Description', info.get('sysDescr', 'Bilinmiyor')), ('Uptime', info.get('sysUpTime', 'Bilinmiyor')), ('Contact', info.get('sysContact', 'Bilinmiyor')), ('Location', info.get('sysLocation', 'Bilinmiyor'))]
+    fields = [('IP', host), ('Marka', info.get('vendor', 'Bilinmiyor')), ('Device Name', info.get('sysName', 'Bilinmiyor')), ('Description', info.get('sysDescr', 'Bilinmiyor')), ('Uptime', info.get('sysUpTime', 'Bilinmiyor')), ('Contact', info.get('sysContact', 'Bilinmiyor')), ('Location', info.get('sysLocation', 'Bilinmiyor'))]
     for label, value in fields:
         print(Fore.WHITE + f'{label}: ' + Fore.GREEN + value + Style.RESET_ALL)
 
@@ -107,5 +109,7 @@ def run() -> None:
     except ConnectionError as exc:
         print(Fore.RED + f'[!] SNMP sorgusu başarısız: {exc}\n' + '    Cihazın SNMP v2c etkin olduğundan ve community bilgisinin doğru olduğundan emin olun.' + Style.RESET_ALL)
         return
+    info['vendor'] = snmp_vendor(info.get('sysObjectID', ''), info.get('sysDescr', '')) or 'Bilinmiyor'
     _print_results(ip_input, info)
+    save_session('snmp_info', {'host': ip_input, 'version': 'v2c', **info})
     print(Fore.GREEN + '\n[+] SNMP sorgusu tamamlandı.' + Style.RESET_ALL)

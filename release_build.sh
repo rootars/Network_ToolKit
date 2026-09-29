@@ -83,6 +83,8 @@ if ! "$PYTHON" -m nuitka \
   --include-package=dns \
   --include-package=pysnmp \
   --include-package=pyasn1 \
+  --include-package=netaddr \
+  --include-package-data=netaddr \
   main.py; then
   error "Nuitka build başarısız. C derleyicisi (gcc/clang) kurulu olduğundan emin olun."
 fi

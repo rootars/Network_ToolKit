@@ -12,6 +12,7 @@ import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from colorama import Fore, Style
 from modules.session_store import save as save_session
+from modules.vendor import get_arp_table, mac_vendor
 DEFAULT_TIMEOUT = 1.0
 MAX_HOSTS = 254
 MAX_WORKERS = 50
@@ -59,6 +60,14 @@ def _scan_network(hosts: list[str], timeout: float) -> list[str]:
     alive.sort(key=lambda ip: ipaddress.IPv4Address(ip))
     return alive
 
+def _identify_devices(hosts: list[str]) -> list[dict[str, str | None]]:
+    arp_table = get_arp_table()
+    devices: list[dict[str, str | None]] = []
+    for host in hosts:
+        mac = arp_table.get(host)
+        devices.append({'ip': host, 'mac': mac, 'vendor': mac_vendor(mac) if mac else None})
+    return devices
+
 def run() -> None:
     print(Fore.CYAN + Style.BRIGHT + '\n=== Ping Scanner ===' + Style.RESET_ALL)
     cidr_input = input(Fore.WHITE + 'Ping taraması yapmak istediğiniz network adresini giriniz.\n' + 'Örnek: 192.168.1.0/24\n> ' + Style.RESET_ALL).strip()
@@ -89,10 +98,15 @@ def run() -> None:
     print(Fore.CYAN + Style.BRIGHT + '\n' + '=' * 40)
     print('PING SCANNER SONUÇLARI')
     print('=' * 40 + Style.RESET_ALL + '\n')
-    if alive_hosts:
-        for host in alive_hosts:
-            print(Fore.GREEN + f'[ALIVE] {host}' + Style.RESET_ALL)
+    devices = _identify_devices(alive_hosts)
+    if devices:
+        for device in devices:
+            mac = device['mac'] or '-'
+            vendor = device['vendor'] or ('Bilinmiyor' if device['mac'] else '-')
+            print(Fore.GREEN + f"[ALIVE] {device['ip']:<16}" + Fore.WHITE + f'{mac:<18} ' + Fore.CYAN + vendor + Style.RESET_ALL)
+        if any((device['mac'] is None for device in devices)):
+            print(Fore.YELLOW + '\n[*] MAC/marka yalnızca aynı yerel ağdaki cihazlar için bulunabilir.\n' + "    Router arkasındaki cihazlar için SNMP Collector'u kullanın." + Style.RESET_ALL)
     else:
         print(Fore.YELLOW + '  Aktif cihaz bulunamadı.' + Style.RESET_ALL)
     print(Fore.CYAN + Style.BRIGHT + f'\nToplam aktif cihaz: {len(alive_hosts)}' + Style.RESET_ALL)
-    save_session('ping_scan', {'network': str(network), 'alive_hosts': alive_hosts, 'total': len(alive_hosts)})
+    save_session('ping_scan', {'network': str(network), 'alive_hosts': alive_hosts, 'devices': devices, 'total': len(alive_hosts)})

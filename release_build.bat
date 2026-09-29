@@ -76,6 +76,8 @@ echo [*] Nuitka build baslatiliyor (bu islem birkac dakika surebilir)...
   --include-package=dns ^
   --include-package=pysnmp ^
   --include-package=pyasn1 ^
+  --include-package=netaddr ^
+  --include-package-data=netaddr ^
   main.py
 
 if errorlevel 1 (
