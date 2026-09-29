@@ -71,8 +71,8 @@ sık kullanılan network / audit işlemlerini tek terminal uygulamasında toplam
 ## Kurulum
 
 ```bash
-git clone <repo-url>
-cd rootipv6-netsec-toolkit
+git clone https://github.com/rootars/Network_ToolKit.git
+cd Network_ToolKit
 python3 -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -86,7 +86,7 @@ python main.py
 
 ## Hazır binary indirme
 
-[GitHub Releases](https://github.com) üzerinden platformunuza uygun ZIP'i indirin:
+[GitHub Releases](https://github.com/rootars/Network_ToolKit/releases) üzerinden platformunuza uygun ZIP'i indirin:
 
 | Platform | Paket |
 |----------|--------|
