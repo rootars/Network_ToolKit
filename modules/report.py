@@ -21,7 +21,7 @@ FORMAT_MENU = {'1': ('TXT', 'txt'), '2': ('JSON', 'json')}
 
 def _generate_filename(extension: str) -> str:
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    return f"rootipv6-netaudit_report_{timestamp}.{extension}"
+    return f"rootars-netaudit_report_{timestamp}.{extension}"
 
 def _format_txt(report_data: dict[str, Any]) -> str:
     lines = [

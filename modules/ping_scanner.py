@@ -93,7 +93,8 @@ def run() -> None:
         f'OS: {platform.system()} | Ping: {ping_flag} | Timeout: {DEFAULT_TIMEOUT}s\n'
         + Style.RESET_ALL
     )
-    print(Fore.YELLOW + '[*] Tarama başlatıldı, lütfen bekleyin...' + Style.RESET_ALL)
+    print(Fore.CYAN + f"[*] Ping atılacak IP'ler: {hosts[0]} - {hosts[-1]}" + (' (ağ ve broadcast adresi hariç)' if network.prefixlen < 31 else '') + Style.RESET_ALL)
+    print(Fore.YELLOW + f'[*] Tarama başlatıldı ({MAX_WORKERS} paralel ping), lütfen bekleyin...' + Style.RESET_ALL)
     alive_hosts = _scan_network(hosts, DEFAULT_TIMEOUT)
     print(Fore.CYAN + Style.BRIGHT + '\n' + '=' * 40)
     print('PING SCANNER SONUÇLARI')
