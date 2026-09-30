@@ -11,6 +11,7 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from colorama import Fore, Style
+from modules.session_store import save as save_session
 TOP_RESULTS = 10
 SSH_FAILURE_PATTERNS = ['failed password', 'invalid user', 'authentication failure', 'connection closed by authenticating user']
 EXTRACT_PATTERNS: list[tuple[re.Pattern[str], int, int]] = [(re.compile('Failed password for invalid user (\\S+) from ([\\d.]+)', re.IGNORECASE), 1, 2), (re.compile('Failed password for (\\S+) from ([\\d.]+)', re.IGNORECASE), 1, 2), (re.compile('Invalid user (\\S+) from ([\\d.]+)', re.IGNORECASE), 1, 2), (re.compile('authentication failure.*rhost=([\\d.]+).*user=(\\S+)', re.IGNORECASE), 2, 1), (re.compile('authentication failure.*user=(\\S+).*rhost=([\\d.]+)', re.IGNORECASE), 1, 2), (re.compile('Connection closed by authenticating user (\\S+) ([\\d.]+)', re.IGNORECASE), 1, 2)]
@@ -95,4 +96,7 @@ def run() -> None:
         return
     attempts = _analyze_log(lines)
     _print_results(attempts)
+    top_ips = Counter((a.ip for a in attempts)).most_common(TOP_RESULTS)
+    top_users = Counter((a.username for a in attempts)).most_common(TOP_RESULTS)
+    save_session('ssh_failed', {'file': str(log_path), 'total_attempts': len(attempts), 'top_ips': [{'ip': ip, 'count': count} for ip, count in top_ips], 'top_users': [{'username': user, 'count': count} for user, count in top_users]})
     print(Fore.GREEN + '\n[+] Analiz tamamlandı.' + Style.RESET_ALL)

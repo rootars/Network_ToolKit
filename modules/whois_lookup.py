@@ -14,6 +14,7 @@ import urllib.request
 from colorama import Fore, Style
 
 from modules.meta import USER_AGENT
+from modules.session_store import save as save_session
 
 IPV4_PATTERN = re.compile('^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$')
 DOMAIN_PATTERN = re.compile('^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}$')
@@ -99,4 +100,5 @@ def run() -> None:
         print(Fore.RED + f'[!] {exc}' + Style.RESET_ALL)
         return
     _print_results(target_input, info)
+    save_session('whois_lookup', {'target': target_input, **info})
     print(Fore.GREEN + '\n[+] Sorgu tamamlandı.' + Style.RESET_ALL)

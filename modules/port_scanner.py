@@ -11,6 +11,7 @@ import re
 import socket
 from colorama import Fore, Style
 from modules.session_store import save as save_session
+from modules.vendor import get_arp_table, mac_vendor
 DEFAULT_TIMEOUT = 1.0
 _IPV4_PATTERN = re.compile('^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$')
 
@@ -80,5 +81,9 @@ def run() -> None:
         results.append({'port': port, 'status': status})
         color = _status_color(status)
         print(color + f'[{status}] {port}' + Style.RESET_ALL)
-    save_session('port_scan', {'target': ip_input, 'ports': ports, 'results': results})
+    mac = get_arp_table().get(ip_input)
+    vendor = mac_vendor(mac) if mac else None
+    if mac:
+        print(Fore.CYAN + f"\n[*] Cihaz: {vendor or 'Bilinmiyor'} (MAC {mac})" + Style.RESET_ALL)
+    save_session('port_scan', {'target': ip_input, 'mac': mac, 'vendor': vendor, 'ports': ports, 'results': results})
     print(Fore.GREEN + '\n[+] Tarama tamamlandı.' + Style.RESET_ALL)

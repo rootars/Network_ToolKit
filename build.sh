@@ -41,6 +41,8 @@ echo "[*] Nuitka build başlatılıyor (${BINARY_NAME})..."
   --include-package=dns \
   --include-package=pysnmp \
   --include-package=pyasn1 \
+  --include-package=netaddr \
+  --include-package-data=netaddr \
   main.py
 
 echo "[+] Build tamamlandı: dist/${BINARY_NAME}"
